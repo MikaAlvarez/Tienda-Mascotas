@@ -1,0 +1,49 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="max-w-xl mx-auto py-6 px-4">
+    <h1 class="text-2xl font-bold mb-4">Nuevo Artículo</h1>
+
+    <form action="{{ route('articulos.store') }}" method="POST" class="space-y-4">
+        @csrf
+
+        <div>
+            <label class="block font-semibold">Nombre</label>
+            <input type="text" name="nombre" class="w-full border rounded px-3 py-2" value="{{ old('nombre') }}">
+            @error('nombre') <small class="text-red-500">{{ $message }}</small> @enderror
+        </div>
+
+        <div>
+            <label class="block font-semibold">Descripción</label>
+            <textarea name="descripcion" class="w-full border rounded px-3 py-2">{{ old('descripcion') }}</textarea>
+        </div>
+
+        <div>
+            <label class="block font-semibold">Precio</label>
+            <input type="number" name="precio" step="0.01" class="w-full border rounded px-3 py-2" value="{{ old('precio') }}">
+            @error('precio') <small class="text-red-500">{{ $message }}</small> @enderror
+        </div>
+
+        <div>
+            <label class="block font-semibold">Stock</label>
+            <input type="number" name="stock" class="w-full border rounded px-3 py-2" value="{{ old('stock') }}">
+            @error('stock') <small class="text-red-500">{{ $message }}</small> @enderror
+        </div>
+
+       <div> <label class="block font-semibold">Categoría</label> <select name="categoria_id" id="categoria_id" class="w-full border rounded px-3 py-2"> <option value="">Seleccione</option> @foreach($categorias as $categoria) <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}> {{ $categoria->nombre }} </option> @endforeach <option value="nueva">+ Agregar nueva categoría</option> </select> @error('categoria_id') <small class="text-red-500">{{ $message }}
+
+       </small> @enderror </div>
+
+       <div id="nueva_categoria_container" class="mt-2 hidden"> <input type="text" id="nueva_categoria" name="nueva_categoria" class="w-full border rounded px-3 py-2" placeholder="Escriba nueva categoría"> <button type="button" id="guardar_categoria" class="mt-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"> Guardar categoría </button> 
+    </div>
+
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Guardar</button>
+
+        <script> document.addEventListener('DOMContentLoaded', function () { const select = document.getElementById('categoria_id'); 
+        const nuevaContainer = document.getElementById('nueva_categoria_container'); 
+        const nuevaInput = document.getElementById('nueva_categoria'); 
+        const guardarBtn = document.getElementById('guardar_categoria'); // Mostrar campo si se elige "nueva" select.addEventListener('change', function () { if (this.value === 'nueva') { nuevaContainer.classList.remove('hidden'); } else { nuevaContainer.classList.add('hidden'); } }); // Guardar nueva categoría con fetch guardarBtn.addEventListener('click', async function () { const nombre = nuevaInput.value.trim(); if (nombre === '') { alert('Escriba un nombre de categoría'); return; } try { const resp = await fetch('/api/categorias', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ nombre }) }); if (!resp.ok) throw new Error('No se pudo guardar'); const data = await resp.json(); // Agregar la nueva categoría al select const option = new Option(data.nombre, data.id, true, true); select.add(option); select.value = data.id; // Limpiar campo e irse nuevaInput.value = ''; nuevaContainer.classList.add('hidden'); } catch (err) { alert('Error al guardar la categoría'); } }); }); </script>
+
+    </form>
+</div>
+@endsection
